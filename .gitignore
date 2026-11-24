@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+.coverage
+.env
+.env.*
+.streamlit/secrets.toml
+data/raw/
+*.tmp
+.DS_Store
+.playwright-cli/
