@@ -1,7 +1,7 @@
 import plotly.graph_objects as go
 import streamlit as st
 
-from src.dashboard import BLUE, TEAL, chart, model_release
+from src.dashboard import CHURN_RED, RETAINED_GREEN, chart, model_release
 from src.explain import explain_case
 from src.predict import predict_one
 from src.schema import CATEGORIES, FIELD_LABELS, INTERNET_ADDONS
@@ -60,7 +60,8 @@ if "scored_profile" in st.session_state:
     probability, decision, risk = st.columns(3)
     probability.metric("Churn probability", f"{prediction.probability:.1%}", border=True)
     decision.metric("Predicted churn", prediction.predicted_class, border=True)
-    risk.metric("Risk band", prediction.risk, border=True)
+    with risk.container(key=f"risk_{prediction.risk.lower()}"):
+        st.metric("Risk band", prediction.risk, border=True)
     st.caption(
         "This is a statistical estimate for the last submitted profile. "
         "Actual customer outcomes can differ."
@@ -77,7 +78,7 @@ if "scored_profile" in st.session_state:
             differences = [100 * entry["difference"] for entry in changes]
             figure = go.Figure(go.Bar(
                 x=differences, y=[entry["group"] for entry in changes], orientation="h",
-                marker_color=[BLUE if value > 0 else TEAL for value in differences],
+                marker_color=[CHURN_RED if value > 0 else RETAINED_GREEN for value in differences],
                 text=[f"{value:+.1f} pp" for value in differences], textposition="outside",
                 cliponaxis=False, hovertemplate="%{y} · %{x:+.1f} pp<extra></extra>",
             ))

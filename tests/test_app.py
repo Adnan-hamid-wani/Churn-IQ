@@ -1,6 +1,10 @@
+import json
+
+import pandas as pd
 import pytest
 from streamlit.testing.v1 import AppTest
 
+from src.dashboard import tenure_churn
 from src.data_loader import ROOT
 
 
@@ -36,7 +40,15 @@ def test_explorer_can_filter_to_monthly_contracts():
     app.multiselect(key="contract_filter").set_value(["Month-to-month"]).run()
     assert not app.exception
     assert "3,875" in app.metric[0].value
+    traces = json.loads(app.get("plotly_chart")[-1].proto.spec)["data"]
+    assert traces[0]["type"] == "pie"
+    assert traces[0]["labels"] == ["Retained", "Churned"]
+    assert traces[0]["values"] == [2220, 1655]
 
+    next(button for button in app.button if button.label == "Clear filters").click().run()
+    assert not app.exception
+    assert app.metric[0].value == "7,043"
+    assert all(not widget.value for widget in app.multiselect)
 
 
 def test_batch_example_scores_both_rows():
@@ -47,3 +59,18 @@ def test_batch_example_scores_both_rows():
     assert not app.error
     assert "2 customers scored" in app.success[0].value
     assert app.dataframe[0].value["customerID"].tolist() == ["DEMO-001", "DEMO-002"]
+
+
+
+def test_tenure_chart_compares_customers_and_charges_within_each_group():
+    sample = pd.DataFrame({
+        "tenure": [0, 5, 6, 72],
+        "MonthlyCharges": [90, 10, 20, 25],
+        "Churn": ["Yes", "No", "No", "Yes"],
+    })
+    groups = tenure_churn(sample)
+    assert groups.loc["0–5", "churn_rate"] == pytest.approx(0.5)
+    assert groups.loc["0–5", "charge_share"] == pytest.approx(0.9)
+    assert groups.loc["6–11", "charge_share"] == 0
+    assert pd.isna(groups.loc["12–17", "charge_share"])
+    assert groups.loc["66–72", "customers"] == 1

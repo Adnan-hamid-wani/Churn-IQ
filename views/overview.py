@@ -1,6 +1,9 @@
 import streamlit as st
 
-from src.dashboard import OUTCOME_COLORS, churn_rate_chart, metric_cards, sample_data
+from src.dashboard import (
+    churn_rate_chart, metric_cards, outcome_donut, sample_data, tenure_churn, tenure_churn_chart,
+)
+from src.schema import CATEGORIES
 
 with st.container(key="overview_header"):
     heading, action = st.columns([3, 1], vertical_alignment="center")
@@ -22,36 +25,40 @@ metric_cards([
     ("Average tenure", f"{data['tenure'].mean():.1f} months"),
 ], highlight="Recorded churn rate")
 
-contract_panel, outcome_panel = st.columns([3, 2], gap="medium")
+with st.container(border=True, key="surface_tenure"):
+    title, filter_panel = st.columns([3, 1], vertical_alignment="center")
+    with title:
+        st.header("Churn by customer tenure")
+        st.caption("Churn rate and the share of monthly charges from churned customers in each tenure group.")
+    contract = filter_panel.selectbox(
+        "Contract in this chart", ["All contracts", *CATEGORIES["Contract"]], key="tenure_contract",
+    )
+    selection = data if contract == "All contracts" else data[data["Contract"].eq(contract)]
+    groups = tenure_churn(selection)
+    tenure_churn_chart(groups)
+    populated = groups[groups["customers"].gt(0)]
+    peak_band = populated["churn_rate"].idxmax()
+    peak = populated.loc[peak_band]
+    st.caption(
+        f"The highest recorded churn rate was {peak['churn_rate']:.1%} in the {peak_band}-month group "
+        f"({peak['customers']:,.0f} customers)."
+    )
+    with st.expander("View tenure data"):
+        st.table({
+            "Tenure (months)": populated.index.tolist(),
+            "Customers": populated["customers"].tolist(),
+            "Customer churn rate": [f"{value:.1%}" for value in populated["churn_rate"]],
+            "Monthly charge share": populated["charge_share"].map("{:.1%}".format, na_action="ignore").fillna("—").tolist(),
+        })
+
+outcome_panel, contract_panel = st.columns([2, 3], gap="medium")
+with outcome_panel.container(border=True, height="stretch", key="surface_outcomes"):
+    st.header("Customer outcomes")
+    outcome_donut(churned)
+
 with contract_panel.container(border=True, height="stretch", key="surface_contract"):
     st.header("Churn by contract")
     rates = churn_rate_chart(data, "Contract", max_rate=0.55, height=235)
-    with st.expander("View contract data"):
-        st.table({
-            "Contract": rates["Contract"].tolist()[::-1],
-            "Customers": rates["customers"].tolist()[::-1],
-            "Recorded churn": [f"{rate:.1%}" for rate in rates["rate"][::-1]],
-        })
-
-with outcome_panel.container(border=True, height="stretch", key="surface_outcomes"):
-    st.header("Customer outcomes")
-    counts = {"Retained": int((~churned).sum()), "Churned": int(churned.sum())}
-    total = len(data)
-    blocks = "".join(
-        f'<span class="churn-outcome-block" style="--customers:{count};'
-        f'--outcome-color:{OUTCOME_COLORS[label]}"></span>'
-        for label, count in counts.items()
-    )
-    rows = "".join(
-        f'<div style="--outcome-color:{OUTCOME_COLORS[label]}"><dt>{label}</dt>'
-        f'<dd>{count:,}</dd><dd>{count / total:.1%}</dd></div>'
-        for label, count in counts.items()
-    )
-    st.html(
-        f'<div class="churn-outcome-bar" aria-hidden="true">{blocks}</div>'
-        f'<dl class="churn-outcomes" aria-label="Customer outcomes">{rows}</dl>'
-    )
-
     high, low = rates.iloc[-1], rates.iloc[0]
     with st.container(key="contract_observation"):
         st.markdown(
@@ -59,3 +66,10 @@ with outcome_panel.container(border=True, height="stretch", key="surface_outcome
             f"Recorded churn was {high['rate']:.1%} for {high['Contract'].lower()} contracts "
             f"and {low['rate']:.1%} for {low['Contract'].lower()} contracts."
         )
+
+    with st.expander("View contract data"):
+        st.table({
+            "Contract": rates["Contract"].tolist()[::-1],
+            "Customers": rates["customers"].tolist()[::-1],
+            "Recorded churn": [f"{rate:.1%}" for rate in rates["rate"][::-1]],
+        })
