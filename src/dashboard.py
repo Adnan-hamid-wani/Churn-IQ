@@ -11,12 +11,14 @@ from src.data_loader import load_dataset
 from src.schema import TARGET
 
 NAVY = "#142840"
-BLUE = "#315A79"
+BLUE = "#285D87"
 TEAL = "#116858"
+TERRACOTTA = "#9E4524"
+PLUM = "#604285"
 MUTED = "#465D66"
 GRID = "#D5E1DD"
 OUTCOME_LABELS = {"No": "Retained", "Yes": "Churned"}
-OUTCOME_COLORS = {"Retained": BLUE, "Churned": TEAL}
+OUTCOME_COLORS = {"Retained": BLUE, "Churned": TERRACOTTA}
 
 
 @st.cache_data(show_spinner="Loading the verified IBM sample…")
@@ -103,8 +105,8 @@ def tenure_churn_chart(groups: pd.DataFrame) -> None:
     labels = groups.index.tolist()
     figure = go.Figure()
     for column, name, color, dash, symbol in [
-        ("churn_rate", "Customer churn rate", TEAL, "solid", "circle"),
-        ("charge_share", "Monthly charge share", BLUE, "dash", "diamond"),
+        ("churn_rate", "Customer churn rate", TERRACOTTA, "solid", "circle"),
+        ("charge_share", "Monthly charge share", PLUM, "dash", "diamond"),
     ]:
         figure.add_scatter(
             x=labels, y=groups[column], name=name, mode="lines+markers",
@@ -162,7 +164,7 @@ def churn_rate_chart(
     rates = churn_by(data, column)
     figure = go.Figure(go.Bar(
         x=rates["rate"], y=rates[column].astype(str), orientation="h",
-        marker_color=TEAL, text=rates["rate"].map(lambda rate: f"{rate:.1%}"),
+        marker_color=TERRACOTTA, text=rates["rate"].map(lambda rate: f"{rate:.1%}"),
         textposition="outside", cliponaxis=False, customdata=rates["customers"],
         hovertemplate="%{y}<br>%{x:.1%} churn · %{customdata:,} customers<extra></extra>",
     ))

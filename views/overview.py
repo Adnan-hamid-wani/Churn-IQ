@@ -30,12 +30,20 @@ with st.container(border=True, key="surface_tenure"):
     with title:
         st.header("Churn by customer tenure")
         st.caption("Churn rate and the share of monthly charges from churned customers in each tenure group.")
-    contract = filter_panel.selectbox("Contract", ["All contracts", *CATEGORIES["Contract"]], key="tenure_contract")
+    contract = filter_panel.selectbox(
+        "Contract in this chart", ["All contracts", *CATEGORIES["Contract"]], key="tenure_contract",
+    )
     selection = data if contract == "All contracts" else data[data["Contract"].eq(contract)]
     groups = tenure_churn(selection)
     tenure_churn_chart(groups)
+    populated = groups[groups["customers"].gt(0)]
+    peak_band = populated["churn_rate"].idxmax()
+    peak = populated.loc[peak_band]
+    st.caption(
+        f"The highest recorded churn rate was {peak['churn_rate']:.1%} in the {peak_band}-month group "
+        f"({peak['customers']:,.0f} customers)."
+    )
     with st.expander("View tenure data"):
-        populated = groups[groups["customers"].gt(0)]
         st.table({
             "Tenure (months)": populated.index.tolist(),
             "Customers": populated["customers"].tolist(),

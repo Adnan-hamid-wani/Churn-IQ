@@ -73,7 +73,7 @@
     min-width: 0;
 }
 .churn-kpi + .churn-kpi { border-left: 1px solid var(--churn-line); }
-.churn-kpi.is-highlighted { background: rgb(207 231 223 / 44%); }
+.churn-kpi.is-highlighted { background: #F6E6DB; }
 .churn-kpi dt,
 .churn-outcomes dt {
     color: var(--churn-muted);
@@ -89,7 +89,7 @@
     line-height: 1.15;
     font-variant-numeric: tabular-nums;
 }
-.churn-kpi.is-highlighted dd { color: var(--churn-accent-dark); }
+.churn-kpi.is-highlighted dd { color: #803719; }
 .st-key-surface_tenure h2,
 .st-key-surface_contract h2,
 .st-key-surface_outcomes h2 { font-size: 1.5rem; }
@@ -146,6 +146,7 @@
         --churn-blur: none;
     }
 }
+.st-key-surface_filters button[data-testid="stBaseButton-secondary"] { min-height: 2.75rem; }
 [data-testid="stCaptionContainer"] { opacity: 1; }
 [data-testid="stCaptionContainer"] p { color: var(--churn-muted); }
 @media (max-width: 700px) {

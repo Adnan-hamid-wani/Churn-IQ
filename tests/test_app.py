@@ -45,6 +45,11 @@ def test_explorer_can_filter_to_monthly_contracts():
     assert traces[0]["labels"] == ["Retained", "Churned"]
     assert traces[0]["values"] == [2220, 1655]
 
+    next(button for button in app.button if button.label == "Clear filters").click().run()
+    assert not app.exception
+    assert app.metric[0].value == "7,043"
+    assert all(not widget.value for widget in app.multiselect)
+
 
 def test_batch_example_scores_both_rows():
     app = AppTest.from_file(ROOT / "app.py", default_timeout=20).run()

@@ -1,7 +1,7 @@
 import plotly.graph_objects as go
 import streamlit as st
 
-from src.dashboard import BLUE, TEAL, chart, model_release
+from src.dashboard import TEAL, TERRACOTTA, chart, model_release
 from src.explain import explain_case
 from src.predict import predict_one
 from src.schema import CATEGORIES, FIELD_LABELS, INTERNET_ADDONS
@@ -77,7 +77,7 @@ if "scored_profile" in st.session_state:
             differences = [100 * entry["difference"] for entry in changes]
             figure = go.Figure(go.Bar(
                 x=differences, y=[entry["group"] for entry in changes], orientation="h",
-                marker_color=[BLUE if value > 0 else TEAL for value in differences],
+                marker_color=[TERRACOTTA if value > 0 else TEAL for value in differences],
                 text=[f"{value:+.1f} pp" for value in differences], textposition="outside",
                 cliponaxis=False, hovertemplate="%{y} · %{x:+.1f} pp<extra></extra>",
             ))
