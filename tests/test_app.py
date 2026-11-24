@@ -1,3 +1,5 @@
+import json
+
 import pytest
 from streamlit.testing.v1 import AppTest
 
@@ -36,7 +38,10 @@ def test_explorer_can_filter_to_monthly_contracts():
     app.multiselect(key="contract_filter").set_value(["Month-to-month"]).run()
     assert not app.exception
     assert "3,875" in app.metric[0].value
-
+    traces = json.loads(app.get("plotly_chart")[-1].proto.spec)["data"]
+    assert traces[0]["type"] == "pie"
+    assert traces[0]["labels"] == ["Retained", "Churned"]
+    assert traces[0]["values"] == [2220, 1655]
 
 
 def test_batch_example_scores_both_rows():

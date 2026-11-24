@@ -69,6 +69,34 @@ def chart(figure: go.Figure, *, height: int = 300, legend: bool = False) -> None
     st.plotly_chart(figure, theme=None, width="stretch", config={"displayModeBar": False})
 
 
+def outcome_donut(churned: pd.Series) -> None:
+    """Plot recorded outcomes and give the counts in an accessible text legend."""
+    total = len(churned)
+    lost = int(churned.sum())
+    counts = {"Retained": total - lost, "Churned": lost}
+    figure = go.Figure(go.Pie(
+        labels=list(counts), values=list(counts.values()), hole=0.73,
+        sort=False, direction="counterclockwise", textinfo="none",
+        marker={"colors": [OUTCOME_COLORS[label] for label in counts], "line": {"color": "#F8FAF9", "width": 2}},
+        hovertemplate="%{label}<br>%{value:,} customers · %{percent:.1%}<extra></extra>",
+    ))
+    figure.add_annotation(
+        x=0.5, y=0.55, text=f"<b>{lost / total:.1%}</b>", showarrow=False,
+        font={"size": 28, "color": NAVY},
+    )
+    figure.add_annotation(
+        x=0.5, y=0.42, text="Churned", showarrow=False, font={"size": 13, "color": MUTED},
+    )
+    chart(figure, height=185)
+
+    rows = "".join(
+        f'<div style="--outcome-color:{OUTCOME_COLORS[label]}"><dt>{label}</dt>'
+        f'<dd>{count:,}</dd><dd>{count / total:.1%}</dd></div>'
+        for label, count in counts.items()
+    )
+    st.html(f'<dl class="churn-outcomes" aria-label="Customer outcomes">{rows}</dl>')
+
+
 def churn_by(data: pd.DataFrame, column: str) -> pd.DataFrame:
     return (
         data.assign(churned=data[TARGET].eq("Yes"))

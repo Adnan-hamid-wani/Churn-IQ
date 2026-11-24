@@ -1,7 +1,7 @@
 import plotly.express as px
 import streamlit as st
 
-from src.dashboard import OUTCOME_COLORS, OUTCOME_LABELS, chart, churn_rate_chart, sample_data
+from src.dashboard import OUTCOME_COLORS, OUTCOME_LABELS, chart, churn_rate_chart, outcome_donut, sample_data
 from src.schema import CATEGORIES, FIELD_LABELS, ID_COLUMN, NUMERIC_FEATURES
 
 st.title("Data Explorer")
@@ -28,9 +28,10 @@ if filtered.empty:
     st.info("That combination matches no customers. Change or clear a filter to continue.")
     st.stop()
 
+churned = filtered["Churn"].eq("Yes")
 count, rate = st.columns(2)
 count.metric("Matching customers", f"{len(filtered):,}", border=True)
-rate.metric("Recorded churn rate", f"{filtered['Churn'].eq('Yes').mean():.1%}", border=True)
+rate.metric("Recorded churn rate", f"{churned.mean():.1%}", border=True)
 
 quantitative, categorical = st.columns(2)
 with quantitative.container(border=True, key="surface_numeric"):
@@ -45,14 +46,18 @@ with quantitative.container(border=True, key="surface_numeric"):
     chart(figure, legend=True)
 
 with categorical.container(border=True, key="surface_category"):
-    st.subheader("Churn by category")
-    categories = ("InternetService", "Contract", "PaymentMethod", "OnlineSecurity",
-                  "TechSupport", "gender", "SeniorCitizen", "Partner", "Dependents")
-    category = st.selectbox("Categorical field", categories, format_func=FIELD_LABELS.get)
-    groups = filtered
-    if category == "SeniorCitizen":
-        groups = filtered.assign(SeniorCitizen=filtered["SeniorCitizen"].map({0: "No", 1: "Yes"}))
-    churn_rate_chart(groups, category, max_rate=1.1)
+    st.subheader("Categorical breakdown")
+    by_category, outcome_mix = st.tabs(["Churn by category", "Outcome mix"])
+    with by_category:
+        categories = ("InternetService", "Contract", "PaymentMethod", "OnlineSecurity",
+                      "TechSupport", "gender", "SeniorCitizen", "Partner", "Dependents")
+        category = st.selectbox("Categorical field", categories, format_func=FIELD_LABELS.get)
+        groups = filtered
+        if category == "SeniorCitizen":
+            groups = filtered.assign(SeniorCitizen=filtered["SeniorCitizen"].map({0: "No", 1: "Yes"}))
+        churn_rate_chart(groups, category, max_rate=1.1)
+    with outcome_mix, st.container(key="outcome_mix"):
+        outcome_donut(churned)
 
 with st.expander("Preview matching records"):
     st.caption("First 50 matching rows, with customer identifiers omitted.")
