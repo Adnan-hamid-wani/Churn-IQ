@@ -1,7 +1,9 @@
 import plotly.express as px
 import streamlit as st
 
-from src.dashboard import OUTCOME_COLORS, OUTCOME_LABELS, chart, churn_rate_chart, outcome_donut, sample_data
+from src.dashboard import (
+    OUTCOME_COLORS, OUTCOME_LABELS, OUTCOME_PATTERNS, chart, churn_rate_chart, outcome_donut, sample_data,
+)
 from src.schema import CATEGORIES, FIELD_LABELS, ID_COLUMN, NUMERIC_FEATURES
 
 st.title("Data Explorer")
@@ -45,10 +47,12 @@ with quantitative.container(border=True, key="surface_numeric"):
     plotted = filtered.assign(Outcome=filtered["Churn"].map(OUTCOME_LABELS))
     figure = px.histogram(
         plotted, x=feature, color="Outcome", barmode="group", nbins=24,
-        color_discrete_map=OUTCOME_COLORS, labels={feature: FIELD_LABELS[feature]}, histnorm="percent",
+        color_discrete_map=OUTCOME_COLORS, pattern_shape="Outcome", pattern_shape_map=OUTCOME_PATTERNS,
+        labels={feature: FIELD_LABELS[feature]}, histnorm="percent",
     )
     figure.update_yaxes(title="Share within each outcome (%)")
     figure.update_layout(bargap=0.12)
+    figure.update_traces(marker_pattern_fillmode="overlay", marker_pattern_fgcolor="#FFFFFF", marker_pattern_fgopacity=0.35)
     chart(figure, legend=True)
 
 with categorical.container(border=True, key="surface_category"):

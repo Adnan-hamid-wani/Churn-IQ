@@ -13,12 +13,14 @@ from src.schema import TARGET
 NAVY = "#142840"
 BLUE = "#285D87"
 TEAL = "#116858"
-TERRACOTTA = "#9E4524"
-PLUM = "#604285"
+CHURN_RED = "#A32836"
+RETAINED_GREEN = "#176B46"
+AMBER = "#916100"
 MUTED = "#465D66"
 GRID = "#D5E1DD"
 OUTCOME_LABELS = {"No": "Retained", "Yes": "Churned"}
-OUTCOME_COLORS = {"Retained": BLUE, "Churned": TERRACOTTA}
+OUTCOME_COLORS = {"Retained": RETAINED_GREEN, "Churned": CHURN_RED}
+OUTCOME_PATTERNS = {"Retained": "", "Churned": "/"}
 
 
 @st.cache_data(show_spinner="Loading the verified IBM sample…")
@@ -105,8 +107,8 @@ def tenure_churn_chart(groups: pd.DataFrame) -> None:
     labels = groups.index.tolist()
     figure = go.Figure()
     for column, name, color, dash, symbol in [
-        ("churn_rate", "Customer churn rate", TERRACOTTA, "solid", "circle"),
-        ("charge_share", "Monthly charge share", PLUM, "dash", "diamond"),
+        ("churn_rate", "Customer churn rate", CHURN_RED, "solid", "circle"),
+        ("charge_share", "Monthly charge share", AMBER, "dash", "diamond"),
     ]:
         figure.add_scatter(
             x=labels, y=groups[column], name=name, mode="lines+markers",
@@ -129,7 +131,14 @@ def outcome_donut(churned: pd.Series) -> None:
     figure = go.Figure(go.Pie(
         labels=list(counts), values=list(counts.values()), hole=0.73,
         sort=False, direction="counterclockwise", textinfo="none",
-        marker={"colors": [OUTCOME_COLORS[label] for label in counts], "line": {"color": "#F8FAF9", "width": 2}},
+        marker={
+            "colors": [OUTCOME_COLORS[label] for label in counts],
+            "line": {"color": "#F8FAF9", "width": 2},
+            "pattern": {
+                "shape": [OUTCOME_PATTERNS[label] for label in counts],
+                "fillmode": "overlay", "fgcolor": "#FFFFFF", "fgopacity": 0.35, "solidity": 0.22,
+            },
+        },
         hovertemplate="%{label}<br>%{value:,} customers · %{percent:.1%}<extra></extra>",
     ))
     figure.add_annotation(
@@ -142,7 +151,7 @@ def outcome_donut(churned: pd.Series) -> None:
     chart(figure, height=185)
 
     rows = "".join(
-        f'<div style="--outcome-color:{OUTCOME_COLORS[label]}"><dt>{label}</dt>'
+        f'<div data-pattern="{OUTCOME_PATTERNS[label]}" style="--outcome-color:{OUTCOME_COLORS[label]}"><dt>{label}</dt>'
         f'<dd>{count:,}</dd><dd>{count / total:.1%}</dd></div>'
         for label, count in counts.items()
     )
@@ -164,7 +173,7 @@ def churn_rate_chart(
     rates = churn_by(data, column)
     figure = go.Figure(go.Bar(
         x=rates["rate"], y=rates[column].astype(str), orientation="h",
-        marker_color=TERRACOTTA, text=rates["rate"].map(lambda rate: f"{rate:.1%}"),
+        marker_color=CHURN_RED, text=rates["rate"].map(lambda rate: f"{rate:.1%}"),
         textposition="outside", cliponaxis=False, customdata=rates["customers"],
         hovertemplate="%{y}<br>%{x:.1%} churn · %{customdata:,} customers<extra></extra>",
     ))
