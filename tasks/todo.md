@@ -9,5 +9,5 @@
 - [x] Build the five Streamlit pages. Verify filters, submitted scores, charts, CSV preview and export in a browser.
 - [x] Finish README, dataset attribution, MIT license, project explanation, 20 interview questions and screenshots.
 - [x] Run the full test suite. Verify a clean launch with no raw data in Git and the committed model artifacts.
-- [ ] Publish the GitHub repository and confirm that its tracked files match the locally verified build.
+- [x] Publish the GitHub repository and confirm that its tracked files match the locally verified build.
 - [ ] Deploy to Streamlit Community Cloud. Confirm anonymous access, run the live smoke tests, and update the README with the verified demo URL.

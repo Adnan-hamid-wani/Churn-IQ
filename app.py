@@ -22,6 +22,6 @@ page = st.navigation(pages, position="top")
 st.html(Path(__file__).resolve().parent / "assets" / "styles.css")
 st.html(
     '<div class="churn-brand"><span class="churn-logo" aria-hidden="true">IQ</span>'
-    '<span>ChurnIQ</span><span class="churn-brand-context">Telecom churn analytics</span></div>'
+    '<span>ChurnIQ</span><span class="churn-brand-context">Telecom analytics</span></div>'
 )
 page.run()

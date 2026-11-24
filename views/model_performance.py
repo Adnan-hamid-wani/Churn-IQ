@@ -13,7 +13,7 @@ threshold = metrics["threshold"]
 selected = metrics["selected_model"]
 row_count = metrics["splits"]["test"]["rows"]
 
-with st.container(border=True):
+with st.container(border=True, key="surface_model_summary"):
     st.subheader(selected)
     st.markdown(
         f"The model led the {metrics['cv_folds']}-fold average precision comparison. "

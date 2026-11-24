@@ -11,10 +11,10 @@ from src.data_loader import load_dataset
 from src.schema import TARGET
 
 NAVY = "#142840"
-BLUE = "#196493"
-TEAL = "#197C71"
-MUTED = "#465D73"
-GRID = "#E5EDF5"
+BLUE = "#315A79"
+TEAL = "#116858"
+MUTED = "#465D66"
+GRID = "#ECF1F0"
 OUTCOME_LABELS = {"No": "Retained", "Yes": "Churned"}
 OUTCOME_COLORS = {"Retained": BLUE, "Churned": TEAL}
 
@@ -45,9 +45,10 @@ def model_release() -> tuple[dict, dict]:
         st.stop()
 
 
-def metric_cards(items: list[tuple[str, str]]) -> None:
+def metric_cards(items: list[tuple[str, str]], *, highlight: str | None = None) -> None:
     entries = "".join(
-        f'<div class="churn-kpi"><dt>{escape(label)}</dt><dd>{escape(value)}</dd></div>'
+        f'<div class="churn-kpi{" is-highlighted" if label == highlight else ""}">'
+        f'<dt>{escape(label)}</dt><dd>{escape(value)}</dd></div>'
         for label, value in items
     )
     st.html(f'<dl class="churn-kpis" aria-label="Key metrics">{entries}</dl>')
@@ -58,7 +59,7 @@ def chart(figure: go.Figure, *, height: int = 300, legend: bool = False) -> None
         height=height,
         paper_bgcolor="#FFFFFF",
         plot_bgcolor="#FFFFFF",
-        font={"family": "Arial, sans-serif", "color": NAVY, "size": 13},
+        font={"family": "Source Sans, Arial, sans-serif", "color": NAVY, "size": 13},
         margin={"l": 8, "r": 12, "t": 14, "b": 8},
         showlegend=legend,
         legend={"orientation": "h", "yanchor": "bottom", "y": 1.02, "x": 0},
@@ -77,15 +78,18 @@ def churn_by(data: pd.DataFrame, column: str) -> pd.DataFrame:
     )
 
 
-def churn_rate_chart(data: pd.DataFrame, column: str, *, max_rate: float = 1.0) -> pd.DataFrame:
+def churn_rate_chart(
+    data: pd.DataFrame, column: str, *, max_rate: float = 1.0, height: int = 300,
+) -> pd.DataFrame:
     rates = churn_by(data, column)
     figure = go.Figure(go.Bar(
         x=rates["rate"], y=rates[column].astype(str), orientation="h",
-        marker_color=BLUE, text=rates["rate"].map(lambda rate: f"{rate:.1%}"),
+        marker_color=TEAL, text=rates["rate"].map(lambda rate: f"{rate:.1%}"),
         textposition="outside", cliponaxis=False, customdata=rates["customers"],
         hovertemplate="%{y}<br>%{x:.1%} churn · %{customdata:,} customers<extra></extra>",
     ))
     figure.update_xaxes(title="Share of customers who churned", tickformat=".0%", range=[0, max_rate])
     figure.update_yaxes(type="category")
-    chart(figure)
+    figure.update_layout(bargap=0.42)
+    chart(figure, height=height)
     return rates

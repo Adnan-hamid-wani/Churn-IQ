@@ -82,7 +82,7 @@ Download the fictional example from Batch Predictions for the exact header and c
 
 ## Screenshots
 
-![ChurnIQ overview](docs/screenshots/overview.png)
+![ChurnIQ overview with key metrics, contract churn rates and customer outcomes](docs/screenshots/overview.png)
 
 [Single-customer prediction](docs/screenshots/prediction.png) · [Model performance](docs/screenshots/performance.png)
 
