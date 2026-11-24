@@ -6,7 +6,7 @@ with st.container(key="overview_header"):
     heading, action = st.columns([3, 1], vertical_alignment="center")
     with heading:
         st.title("Customer churn overview")
-        st.markdown("Explore churn by contract in IBM’s fictional telecom sample.")
+        st.markdown("IBM Telco Customer Churn sample")
     with action.container(key="overview_action", horizontal=True, horizontal_alignment="right"):
         st.page_link(
             "views/predict_churn.py", label="Score a sample customer",
@@ -24,8 +24,7 @@ metric_cards([
 
 contract_panel, outcome_panel = st.columns([3, 2], gap="medium")
 with contract_panel.container(border=True, height="stretch", key="surface_contract"):
-    st.subheader("Churn by contract")
-    st.caption("Share of each contract group that left.")
+    st.header("Churn by contract")
     rates = churn_rate_chart(data, "Contract", max_rate=0.55, height=235)
     with st.expander("View contract data"):
         st.table({
@@ -35,28 +34,28 @@ with contract_panel.container(border=True, height="stretch", key="surface_contra
         })
 
 with outcome_panel.container(border=True, height="stretch", key="surface_outcomes"):
-    st.subheader("Customer outcomes")
-    st.caption("Recorded outcomes across the full sample.")
+    st.header("Customer outcomes")
     counts = {"Retained": int((~churned).sum()), "Churned": int(churned.sum())}
     total = len(data)
-    segments = "".join(
-        f'<span style="width:{count / total:.8%};background:{OUTCOME_COLORS[label]}"></span>'
+    blocks = "".join(
+        f'<span class="churn-outcome-block" style="--customers:{count};'
+        f'--outcome-color:{OUTCOME_COLORS[label]}"></span>'
         for label, count in counts.items()
     )
     rows = "".join(
-        f'<div><dt><span aria-hidden="true" style="background:{OUTCOME_COLORS[label]}"></span>{label}</dt>'
+        f'<div style="--outcome-color:{OUTCOME_COLORS[label]}"><dt>{label}</dt>'
         f'<dd>{count:,}</dd><dd>{count / total:.1%}</dd></div>'
         for label, count in counts.items()
     )
     st.html(
-        f'<div class="churn-outcome-bar" aria-hidden="true">{segments}</div>'
+        f'<div class="churn-outcome-bar" aria-hidden="true">{blocks}</div>'
         f'<dl class="churn-outcomes" aria-label="Customer outcomes">{rows}</dl>'
     )
 
     high, low = rates.iloc[-1], rates.iloc[0]
-    with st.container(key="surface_observation"):
-        st.markdown(f"**{100 * (high['rate'] - low['rate']):.1f} percentage-point gap**")
+    with st.container(key="contract_observation"):
         st.markdown(
+            f"**{100 * (high['rate'] - low['rate']):.1f} percentage-point gap**\n\n"
             f"Recorded churn was {high['rate']:.1%} for {high['Contract'].lower()} contracts "
             f"and {low['rate']:.1%} for {low['Contract'].lower()} contracts."
         )

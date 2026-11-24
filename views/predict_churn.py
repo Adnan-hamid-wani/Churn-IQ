@@ -7,7 +7,7 @@ from src.predict import predict_one
 from src.schema import CATEGORIES, FIELD_LABELS, INTERNET_ADDONS
 
 st.title("Predict Churn")
-st.markdown("Score a fictional customer using their account history, billing and services.")
+st.markdown("The form starts with a fictional customer. Score it as shown or change the details.")
 bundle, _ = model_release()
 
 with st.form("customer_profile", border=True):

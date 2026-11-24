@@ -14,7 +14,7 @@ NAVY = "#142840"
 BLUE = "#315A79"
 TEAL = "#116858"
 MUTED = "#465D66"
-GRID = "#ECF1F0"
+GRID = "#D5E1DD"
 OUTCOME_LABELS = {"No": "Retained", "Yes": "Churned"}
 OUTCOME_COLORS = {"Retained": BLUE, "Churned": TEAL}
 
@@ -57,8 +57,8 @@ def metric_cards(items: list[tuple[str, str]], *, highlight: str | None = None) 
 def chart(figure: go.Figure, *, height: int = 300, legend: bool = False) -> None:
     figure.update_layout(
         height=height,
-        paper_bgcolor="#FFFFFF",
-        plot_bgcolor="#FFFFFF",
+        paper_bgcolor="rgba(0, 0, 0, 0)",
+        plot_bgcolor="rgba(0, 0, 0, 0)",
         font={"family": "Source Sans, Arial, sans-serif", "color": NAVY, "size": 13},
         margin={"l": 8, "r": 12, "t": 14, "b": 8},
         showlegend=legend,
@@ -88,7 +88,7 @@ def churn_rate_chart(
         textposition="outside", cliponaxis=False, customdata=rates["customers"],
         hovertemplate="%{y}<br>%{x:.1%} churn · %{customdata:,} customers<extra></extra>",
     ))
-    figure.update_xaxes(title="Share of customers who churned", tickformat=".0%", range=[0, max_rate])
+    figure.update_xaxes(title="Recorded churn rate", tickformat=".0%", range=[0, max_rate])
     figure.update_yaxes(type="category")
     figure.update_layout(bargap=0.42)
     chart(figure, height=height)
