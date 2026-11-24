@@ -90,6 +90,7 @@
     font-variant-numeric: tabular-nums;
 }
 .churn-kpi.is-highlighted dd { color: var(--churn-accent-dark); }
+.st-key-surface_tenure h2,
 .st-key-surface_contract h2,
 .st-key-surface_outcomes h2 { font-size: 1.5rem; }
 :is(.st-key-surface_outcomes, .st-key-outcome_mix) .pielayer {
@@ -125,14 +126,14 @@
 [data-testid="stVerticalBlock"][height="auto"],
 [data-testid="stForm"] { border-radius: var(--churn-radius); }
 [class*="st-key-surface_"] { background: #F8FAF9; }
-:is([data-testid="stHeader"], .churn-kpis, .st-key-surface_contract,
+:is([data-testid="stHeader"], .churn-kpis, .st-key-surface_tenure, .st-key-surface_contract,
     .st-key-surface_outcomes, .st-key-surface_model_summary, .st-key-surface_local_explanation,
     [data-testid="stForm"]) {
     background: var(--churn-glass);
     border-color: var(--churn-line);
     backdrop-filter: var(--churn-blur);
 }
-:is(.churn-kpis, .st-key-surface_contract, .st-key-surface_outcomes) { box-shadow: var(--churn-edge); }
+:is(.churn-kpis, .st-key-surface_tenure, .st-key-surface_contract, .st-key-surface_outcomes) { box-shadow: var(--churn-edge); }
 @supports (backdrop-filter: blur(1px)) {
     .stApp {
         --churn-glass: rgb(255 255 255 / 51%);
@@ -172,6 +173,7 @@
 }
 @media (prefers-reduced-motion: no-preference) {
     .st-key-overview_header,
+    .st-key-surface_tenure,
     .st-key-surface_contract,
     .st-key-surface_outcomes { animation: churn-arrive 280ms ease-out both; }
     :is(.st-key-surface_outcomes, .st-key-outcome_mix) .pielayer {

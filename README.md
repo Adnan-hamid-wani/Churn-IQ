@@ -10,7 +10,7 @@ ChurnIQ is a Streamlit portfolio project that explores customer churn in IBM's f
 
 | Page | Workflow |
 | --- | --- |
-| Overview | See recorded churn, account metrics, and the retained-versus-churned mix. |
+| Overview | Compare churn and monthly charges across customer tenure groups, then inspect outcomes and contract churn. |
 | Data Explorer | Filter customers and compare data distributions, category churn rates, and the outcome mix. |
 | Predict Churn | Score a fictional customer and inspect the model's response to specific edits. |
 | Model Performance | Compare cross-validation scores, inspect held-out results, and see global importance. |
@@ -82,7 +82,7 @@ Download the fictional example from Batch Predictions for the exact header and c
 
 ## Screenshots
 
-![ChurnIQ overview with key metrics, contract churn rates and customer outcomes](docs/screenshots/overview.png)
+![ChurnIQ overview with tenure comparison, customer outcomes and contract churn](docs/screenshots/overview.png)
 
 [Filtered outcome chart](docs/screenshots/explorer.png) · [Single-customer prediction](docs/screenshots/prediction.png) · [Model performance](docs/screenshots/performance.png)
 

@@ -1,8 +1,10 @@
 import json
 
+import pandas as pd
 import pytest
 from streamlit.testing.v1 import AppTest
 
+from src.dashboard import tenure_churn
 from src.data_loader import ROOT
 
 
@@ -52,3 +54,18 @@ def test_batch_example_scores_both_rows():
     assert not app.error
     assert "2 customers scored" in app.success[0].value
     assert app.dataframe[0].value["customerID"].tolist() == ["DEMO-001", "DEMO-002"]
+
+
+
+def test_tenure_chart_compares_customers_and_charges_within_each_group():
+    sample = pd.DataFrame({
+        "tenure": [0, 5, 6, 72],
+        "MonthlyCharges": [90, 10, 20, 25],
+        "Churn": ["Yes", "No", "No", "Yes"],
+    })
+    groups = tenure_churn(sample)
+    assert groups.loc["0–5", "churn_rate"] == pytest.approx(0.5)
+    assert groups.loc["0–5", "charge_share"] == pytest.approx(0.9)
+    assert groups.loc["6–11", "charge_share"] == 0
+    assert pd.isna(groups.loc["12–17", "charge_share"])
+    assert groups.loc["66–72", "customers"] == 1

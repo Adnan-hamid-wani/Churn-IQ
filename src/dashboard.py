@@ -54,19 +54,69 @@ def metric_cards(items: list[tuple[str, str]], *, highlight: str | None = None) 
     st.html(f'<dl class="churn-kpis" aria-label="Key metrics">{entries}</dl>')
 
 
-def chart(figure: go.Figure, *, height: int = 300, legend: bool = False) -> None:
+def chart(
+    figure: go.Figure, *, height: int = 300, legend: bool = False, legend_below: bool = False,
+) -> None:
+    legend_layout = {"orientation": "h", "yanchor": "bottom", "y": 1.02, "x": 0}
+    if legend_below:
+        legend_layout.update(x=0.5, xanchor="center", y=0, yanchor="bottom", yref="container")
     figure.update_layout(
         height=height,
         paper_bgcolor="rgba(0, 0, 0, 0)",
         plot_bgcolor="rgba(0, 0, 0, 0)",
         font={"family": "Source Sans, Arial, sans-serif", "color": NAVY, "size": 13},
-        margin={"l": 8, "r": 12, "t": 14, "b": 8},
+        margin={"l": 8, "r": 12, "t": 14, "b": 88 if legend_below else 8},
         showlegend=legend,
-        legend={"orientation": "h", "yanchor": "bottom", "y": 1.02, "x": 0},
+        legend=legend_layout,
     )
     figure.update_xaxes(gridcolor=GRID, zerolinecolor=GRID, automargin=True, fixedrange=True)
     figure.update_yaxes(gridcolor=GRID, zerolinecolor=GRID, automargin=True, fixedrange=True)
     st.plotly_chart(figure, theme=None, width="stretch", config={"displayModeBar": False})
+
+
+def tenure_churn(data: pd.DataFrame) -> pd.DataFrame:
+    """Measure churn and charge share within the same tenure groups."""
+    edges = [*range(0, 72, 6), 73]
+    labels = [f"{start}–{end - 1}" for start, end in zip(edges[:-1], edges[1:], strict=True)]
+    churned = data[TARGET].eq("Yes")
+    charges = data["MonthlyCharges"]
+    groups = (
+        data.assign(
+            tenure_band=pd.cut(data["tenure"], edges, labels=labels, right=False),
+            churned=churned,
+            churned_charges=charges.where(churned, 0),
+        )
+        .groupby("tenure_band", observed=False)
+        .agg(
+            customers=(TARGET, "size"),
+            churn_rate=("churned", "mean"),
+            charges=("MonthlyCharges", "sum"),
+            churned_charges=("churned_charges", "sum"),
+        )
+    )
+    charge_total = groups["charges"].where(groups["charges"].gt(0))
+    groups["charge_share"] = groups["churned_charges"].div(charge_total)
+    return groups
+
+
+def tenure_churn_chart(groups: pd.DataFrame) -> None:
+    labels = groups.index.tolist()
+    figure = go.Figure()
+    for column, name, color, dash, symbol in [
+        ("churn_rate", "Customer churn rate", TEAL, "solid", "circle"),
+        ("charge_share", "Monthly charge share", BLUE, "dash", "diamond"),
+    ]:
+        figure.add_scatter(
+            x=labels, y=groups[column], name=name, mode="lines+markers",
+            line={"color": color, "dash": dash, "width": 3},
+            marker={"size": 7, "symbol": symbol, "line": {"color": "#F8FAF9", "width": 1}},
+            hovertemplate=f"%{{y:.1%}}<extra>{name}</extra>",
+        )
+    ticks = [labels[index] for index in (0, 2, 4, 6, 8, 11)]
+    figure.update_layout(hovermode="x unified")
+    figure.update_xaxes(title="Customer tenure (months)", tickmode="array", tickvals=ticks, griddash="dot")
+    figure.update_yaxes(tickformat=".0%", rangemode="tozero", griddash="dot")
+    chart(figure, height=335, legend=True, legend_below=True)
 
 
 def outcome_donut(churned: pd.Series) -> None:
